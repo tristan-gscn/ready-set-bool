@@ -1,0 +1,5 @@
+[package]
+name = "ready-set-bool"
+version = "0.1.0"
+edition = "2021"
+authors = ["tristan-gscn"]
