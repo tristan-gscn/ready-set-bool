@@ -1,9 +1,16 @@
+#[allow(dead_code)]
+#[path = "ex00.rs"]
+mod ex00;
+use ex00::adder;
+
 fn multiplier(a: u32, b: u32) -> u32 {
     let mut result = 0;
     for i in 0..32 {
-
+        if (b >> i) & 1 == 1 {
+            result = adder(result, a << i);
+        }
     }
-    0
+    result
 }
 
 fn main() {
@@ -44,7 +51,10 @@ mod tests {
     #[test]
     fn overflow_wraps() {
         assert_eq!(multiplier(u32::MAX, 2), u32::MAX.wrapping_mul(2));
-        assert_eq!(multiplier(u32::MAX, u32::MAX), u32::MAX.wrapping_mul(u32::MAX));
+        assert_eq!(
+            multiplier(u32::MAX, u32::MAX),
+            u32::MAX.wrapping_mul(u32::MAX)
+        );
     }
 
     #[test]
