@@ -8,17 +8,23 @@ use std::fmt;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Formula {
     Value(bool),
+    Var(char),
     Not(Box<Formula>),
     Binary(Op, Box<Formula>, Box<Formula>),
 }
 
 impl Formula {
     /// Walks the tree and computes its value.
-    pub fn eval(&self) -> bool {
+    ///
+    /// `values` holds one boolean per letter, `values[0]` being `A`. Since it
+    /// covers the whole alphabet, every variable has a value and the
+    /// evaluation cannot fail.
+    pub fn eval(&self, values: &[bool; 26]) -> bool {
         match self {
             Formula::Value(b) => *b,
-            Formula::Not(inner) => !inner.eval(),
-            Formula::Binary(op, left, right) => op.apply(left.eval(), right.eval()),
+            Formula::Var(name) => values[*name as usize - 'A' as usize],
+            Formula::Not(inner) => !inner.eval(values),
+            Formula::Binary(op, left, right) => op.apply(left.eval(values), right.eval(values)),
         }
     }
 
@@ -42,6 +48,7 @@ impl Formula {
         match self {
             Formula::Value(false) => '0'.to_string(),
             Formula::Value(true) => '1'.to_string(),
+            Formula::Var(name) => name.to_string(),
             Formula::Not(_) => '!'.to_string(),
             Formula::Binary(op, _, _) => op.as_char().to_string(),
         }
@@ -49,7 +56,7 @@ impl Formula {
 
     fn children(&self) -> Vec<&Formula> {
         match self {
-            Formula::Value(_) => Vec::new(),
+            Formula::Value(_) | Formula::Var(_) => Vec::new(),
             Formula::Not(inner) => vec![inner],
             Formula::Binary(_, left, right) => vec![left, right],
         }
@@ -78,6 +85,7 @@ impl fmt::Display for Formula {
         match self {
             Formula::Value(false) => write!(f, "0"),
             Formula::Value(true) => write!(f, "1"),
+            Formula::Var(name) => write!(f, "{name}"),
             Formula::Not(inner) => write!(f, "{inner}!"),
             Formula::Binary(op, left, right) => write!(f, "{left}{right}{}", op.as_char()),
         }

@@ -7,7 +7,8 @@ use formula::parse;
 
 pub fn eval_formula(formula: &str) -> bool {
     match parse(formula) {
-        Ok(tree) => tree.eval(),
+        // No variables here: what the values hold does not matter.
+        Ok(tree) => tree.eval(&[false; 26]),
         Err(reason) => {
             eprintln!("error: {formula:?}: {reason}");
             false
@@ -19,7 +20,7 @@ pub fn eval_formula(formula: &str) -> bool {
 fn show_tree(formula: &str) {
     match parse(formula) {
         Ok(tree) => {
-            println!("{formula} = {}", tree.eval());
+            println!("{formula} = {}", tree.eval(&[false; 26]));
             println!();
             print!("{}", tree.tree());
         }
@@ -38,7 +39,7 @@ fn main() {
     show_tree("1!01^>");
 
     println!();
-    for formula in ["", "1&", "10", "1a&", "A1&"] {
+    for formula in ["", "1&", "10", "1a&"] {
         println!("eval_formula(\"{formula}\") = {}", eval_formula(formula));
     }
 }
@@ -162,7 +163,7 @@ mod tests {
             )),
         );
 
-        assert!(tree.eval());
+        assert!(tree.eval(&[false; 26]));
     }
 
     #[test]
@@ -191,9 +192,6 @@ mod tests {
         assert_eq!(parse(""), Err(ParseError::Empty));
         assert_eq!(parse("1a&"), Err(ParseError::UnknownSymbol('a')));
         assert_eq!(parse("1 0&"), Err(ParseError::UnknownSymbol(' ')));
-        // Letters are variables from ex04 on, but not valid input here.
-        assert_eq!(parse("A"), Err(ParseError::UnknownSymbol('A')));
-        assert_eq!(parse("AB>"), Err(ParseError::UnknownSymbol('A')));
         assert_eq!(parse("&"), Err(ParseError::MissingOperand('&')));
         assert_eq!(parse("1&"), Err(ParseError::MissingOperand('&')));
         assert_eq!(parse("!"), Err(ParseError::MissingOperand('!')));

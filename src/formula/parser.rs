@@ -7,8 +7,9 @@ use std::fmt;
 
 /// Builds the tree from a formula in reverse polish notation, in O(n).
 ///
-/// Symbols: `0` and `1` for the constants, `!` for the negation, and
-/// `& | ^ > =` for the binary operators. Anything else is invalid.
+/// Symbols: `0` and `1` for the constants, `A..Z` for the variables, `!` for
+/// the negation, and `& | ^ > =` for the binary operators. Anything else is
+/// invalid.
 pub fn parse(formula: &str) -> Result<Formula, ParseError> {
     let mut stack: Vec<Formula> = Vec::new();
 
@@ -16,6 +17,7 @@ pub fn parse(formula: &str) -> Result<Formula, ParseError> {
         match c {
             '0' => stack.push(Formula::Value(false)),
             '1' => stack.push(Formula::Value(true)),
+            'A'..='Z' => stack.push(Formula::Var(c)),
             '!' => {
                 let operand = stack.pop().ok_or(ParseError::MissingOperand(c))?;
                 stack.push(Formula::Not(Box::new(operand)));

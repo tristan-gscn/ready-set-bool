@@ -2,6 +2,7 @@
 
 pub mod op;
 pub mod parser;
+pub mod table;
 pub mod tree;
 
 pub use op::Op;
