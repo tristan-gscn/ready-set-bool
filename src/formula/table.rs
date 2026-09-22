@@ -45,6 +45,34 @@ impl Formula {
     /// [`Formula::variables`] — and what the formula evaluates to for them.
     /// A formula without variables still yields exactly one row.
     pub fn for_each_row(&self, mut row: impl FnMut(&[bool], bool)) {
+        self.each_row_while(|values, result| {
+            row(values, result);
+            true
+        });
+    }
+
+    /// Whether some assignment of the variables makes the formula true.
+    ///
+    /// Brute force over the truth table, which the subject allows: its
+    /// maximum time complexity for ex07 is O(2^n). The walk stops at the
+    /// first row that comes out true, so only an unsatisfiable formula
+    /// actually costs the full 2^n.
+    pub fn is_satisfiable(&self) -> bool {
+        let mut satisfiable = false;
+
+        self.each_row_while(|_, result| {
+            satisfiable = result;
+            !result // keep going as long as no row is true
+        });
+
+        satisfiable
+    }
+
+    /// Walks the assignments, stopping as soon as `row` returns false.
+    ///
+    /// Returns whether every row was visited, so a caller can tell a walk
+    /// that ran to the end from one that broke out early.
+    fn each_row_while(&self, mut row: impl FnMut(&[bool], bool) -> bool) -> bool {
         let variables = self.variables();
         let count = variables.len();
 
@@ -60,7 +88,12 @@ impl Formula {
                 line[j] = value;
                 assignment[*name as usize - 'A' as usize] = value;
             }
-            row(&line, self.eval(&assignment));
+
+            if !row(&line, self.eval(&assignment)) {
+                return false;
+            }
         }
+
+        true
     }
 }
