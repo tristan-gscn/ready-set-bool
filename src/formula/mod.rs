@@ -1,5 +1,6 @@
 //! Propositional formulas: from reverse polish notation, to a tree, to a value.
 
+pub mod cnf;
 pub mod nnf;
 pub mod op;
 pub mod parser;
